@@ -489,7 +489,8 @@ MaybeHandle<AsmWasmData> WasmEngine::SyncCompileTranslatedAsmJs(
   if (result.failed()) {
     // This happens once in a while when we have missed some limit check
     // in the asm parser. Output an error message to help diagnose, but crash.
-    std::cout << result.error().message();
+    // MKE: std::cout << result.error().message();
+    printf(result.error().message().c_str());
     UNREACHABLE();
   }
 

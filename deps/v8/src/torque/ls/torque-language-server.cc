@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 #include "src/torque/ls/globals.h"

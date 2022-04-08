@@ -5,7 +5,6 @@
 #ifndef V8_TORQUE_SOURCE_POSITIONS_H_
 #define V8_TORQUE_SOURCE_POSITIONS_H_
 
-#include <iostream>
 
 #include "src/torque/contextual.h"
 

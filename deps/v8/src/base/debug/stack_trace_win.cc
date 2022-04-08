@@ -18,7 +18,6 @@
 #include <dbghelp.h>
 #include <stddef.h>
 
-#include <iostream>
 #include <memory>
 #include <string>
 
@@ -226,7 +225,31 @@ void StackTrace::InitTrace(const CONTEXT* context_record) {
   for (size_t i = count_; i < arraysize(trace_); ++i) trace_[i] = nullptr;
 }
 
-void StackTrace::Print() const { OutputToStream(&std::cerr); }
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+ 
+        // clear buffer
+        this->str("");
+ 
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+ 
+static ::std::ostream& MkeCerr () {
+    static CMkeStringBuf s_stringBuf(stderr);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+ 
+void StackTrace::Print() const { OutputToStream(&MkeCerr()); }
 
 void StackTrace::OutputToStream(std::ostream* os) const {
   InitializeSymbols();

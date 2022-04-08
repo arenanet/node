@@ -38,6 +38,30 @@ namespace v8 {
 namespace internal {
 namespace interpreter {
 
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+
+        // clear buffer
+        this->str("");
+
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+
+static ::std::ostream& MkeCout () {
+    static CMkeStringBuf s_stringBuf(stdout);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
 // Scoped class tracking context objects created by the visitor. Represents
 // mutations of the context chain within the function body, allowing pushing and
 // popping of the current {context_register} during visitation.
@@ -1860,12 +1884,12 @@ struct SwitchInfo {
     return covered_cases.size() == 0 ? INT_MIN : covered_cases.rbegin()->first;
   }
   void Print() {
-    std::cout << "Covered_cases: " << '\n';
+    MkeCout() << "Covered_cases: " << '\n';
     for (auto iter = covered_cases.begin(); iter != covered_cases.end();
          ++iter) {
-      std::cout << iter->first << "->" << iter->second << '\n';
+      MkeCout() << iter->first << "->" << iter->second << '\n';
     }
-    std::cout << "Default_case: " << default_case << '\n';
+    MkeCout() << "Default_case: " << default_case << '\n';
   }
 };
 

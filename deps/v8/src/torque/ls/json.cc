@@ -4,7 +4,6 @@
 
 #include "src/torque/ls/json.h"
 
-#include <iostream>
 #include <sstream>
 #include "src/torque/utils.h"
 

@@ -24,7 +24,6 @@
 #include <atomic>
 #include <cinttypes>
 #include <cstdio>
-#include <iostream>
 #include <limits>
 #include <memory>
 
@@ -1288,10 +1287,13 @@ void Environment::PrintInfoForSnapshotIfDebug() {
 
 void Environment::PrintAllBaseObjects() {
   size_t i = 0;
-  std::cout << "BaseObjects\n";
+  // MKE: std::cout << "BaseObjects\n";
+  printf("BaseObjects\n");
   ForEachBaseObject([&](BaseObject* obj) {
-    std::cout << "#" << i++ << " " << obj << ": " <<
-      obj->MemoryInfoName() << "\n";
+    // MKE: std::cout << "#" << i++ << " " << obj << ": " <<
+    //  obj->MemoryInfoName() << "\n";
+    printf("#%zu %p: %s\n", i, obj, obj->MemoryInfoName().c_str());
+    ++i;
   });
 }
 
@@ -1446,6 +1448,31 @@ void Environment::RunDeserializeRequests() {
   }
 }
 
+// MKE added
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+
+        // clear buffer
+        this->str("");
+
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+
+static ::std::ostream& MkeCerr () {
+    static CMkeStringBuf s_stringBuf(stderr);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
 void Environment::DeserializeProperties(const EnvSerializeInfo* info) {
   Local<Context> ctx = context();
 
@@ -1461,7 +1488,7 @@ void Environment::DeserializeProperties(const EnvSerializeInfo* info) {
 
   if (enabled_debug_list_.enabled(DebugCategory::MKSNAPSHOT)) {
     fprintf(stderr, "deserializing...\n");
-    std::cerr << *info << "\n";
+    MkeCerr() << *info << "\n";
   }
 
   const std::vector<PropInfo>& templates = info->persistent_templates;

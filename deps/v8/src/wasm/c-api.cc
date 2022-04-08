@@ -23,8 +23,6 @@
 
 #include <cstring>
 #include <iomanip>
-#include <iostream>
-
 #include "include/libplatform/libplatform.h"
 #include "src/api/api-inl.h"
 #include "src/base/platform/wrappers.h"
@@ -180,7 +178,7 @@ own<ExternType> GetImportExportType(const i::wasm::WasmModule* module,
 // Auxiliaries
 
 [[noreturn]] void WASM_UNIMPLEMENTED(const char* s) {
-  std::cerr << "Wasm API: " << s << " not supported yet!\n";
+  fprintf(stderr, "Wasm API: %s not supported yet!\n", s);
   exit(1);
 }
 

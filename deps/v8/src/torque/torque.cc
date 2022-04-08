@@ -5,6 +5,31 @@
 #include "src/torque/source-positions.h"
 #include "src/torque/torque-compiler.h"
 
+
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+
+        // clear buffer
+        this->str("");
+
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+
+static ::std::ostream& MkeCerr () {
+    static CMkeStringBuf s_stringBuf(stderr);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
 namespace v8 {
 namespace internal {
 namespace torque {
@@ -34,7 +59,7 @@ int WrappedMain(int argc, const char** argv) {
       options.v8_root = std::string(argv[++i]);
     } else if (argument == "-m32") {
 #ifdef V8_COMPRESS_POINTERS
-      std::cerr << "Pointer compression is incompatible with -m32.\n";
+      fprintf(stderr, "Pointer compression is incompatible with -m32.\n");
       base::OS::Abort();
 #else
       options.force_32bit_output = true;
@@ -53,8 +78,8 @@ int WrappedMain(int argc, const char** argv) {
       // Otherwise it's a .tq file. Remember it for compilation.
       files.emplace_back(std::move(argument));
       if (!StringEndsWith(files.back(), ".tq")) {
-        std::cerr << "Unexpected command-line argument \"" << files.back()
-                  << "\", expected a .tq file.\n";
+        fprintf(stderr, "Unexpected command-line argument \"%s"
+                  "\", expected a .tq file.\n", files.back().c_str());
         base::OS::Abort();
       }
     }
@@ -68,10 +93,10 @@ int WrappedMain(int argc, const char** argv) {
 
   for (const TorqueMessage& message : result.messages) {
     if (message.position) {
-      std::cerr << *message.position << ": ";
+      MkeCerr() << *message.position << ": ";
     }
 
-    std::cerr << ErrorPrefixFor(message.kind) << ": " << message.message
+    MkeCerr() << ErrorPrefixFor(message.kind) << ": " << message.message
               << "\n";
   }
 

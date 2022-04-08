@@ -4,7 +4,6 @@
 
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 #include "src/base/strings.h"
@@ -158,7 +157,7 @@ void WriteHeader(const char* header_filename) {
 
 int main(int argc, const char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <output filename>\n";
+    fprintf(stderr, "Usage: %s <output filename>\n", argv[0]);
     std::exit(1);
   }
   v8::internal::WriteHeader(argv[1]);

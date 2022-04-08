@@ -9,7 +9,6 @@
 #include "v8.h"
 
 #include <algorithm>
-#include <iostream>
 #include <map>
 #include <string>
 

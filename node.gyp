@@ -572,6 +572,9 @@
         '<@(deps_files)',
         # node.gyp is added by default, common.gypi is added for change detection
         'common.gypi',
+        # Uncomment these after the first build to include them in libnode
+        #'<(SHARED_INTERMEDIATE_DIR)/node_snapshot.cc',
+        #'<(SHARED_INTERMEDIATE_DIR)/node_code_cache.cc',
       ],
 
       'variables': {

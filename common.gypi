@@ -283,7 +283,8 @@
       'VCCLCompilerTool': {
         'AdditionalOptions': ['/Zc:__cplusplus'],
         'BufferSecurityCheck': 'true',
-        'DebugInformationFormat': 1,          # /Z7 embed info in .obj files
+        #'DebugInformationFormat': 1,          # /Z7 embed info in .obj files
+        'DebugInformationFormat': 3,          # /Zi generate a .pdb
         'ExceptionHandling': 0,               # /EHsc
         'MultiProcessorCompilation': 'true',
         'StringPooling': 'true',              # pool string literals

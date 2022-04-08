@@ -5,7 +5,6 @@
 #include "src/builtins/profile-data-reader.h"
 
 #include <fstream>
-#include <iostream>
 #include <unordered_map>
 
 #include "src/base/lazy-instance.h"

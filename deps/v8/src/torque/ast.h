@@ -6,7 +6,6 @@
 #define V8_TORQUE_AST_H_
 
 #include <algorithm>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <set>

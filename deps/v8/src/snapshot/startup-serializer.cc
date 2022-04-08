@@ -128,14 +128,38 @@ bool IsUnexpectedCodeObject(Isolate* isolate, HeapObject obj) {
 }
 
 }  // namespace
+
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+ 
+        // clear buffer
+        this->str("");
+ 
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+ 
+static ::std::ostream& MkeCerr () {
+    static CMkeStringBuf s_stringBuf(stderr);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
 #endif  // DEBUG
 
 void StartupSerializer::SerializeObjectImpl(Handle<HeapObject> obj) {
 #ifdef DEBUG
   if (obj->IsJSFunction()) {
     v8::base::OS::PrintError("Reference stack:\n");
-    PrintStack(std::cerr);
-    obj->Print(std::cerr);
+    PrintStack(MkeCerr());
+    obj->Print(MkeCerr());
     FATAL(
         "JSFunction should be added through the context snapshot instead of "
         "the isolate snapshot");

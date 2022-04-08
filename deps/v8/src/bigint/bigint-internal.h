@@ -111,8 +111,8 @@ constexpr int InvertScratchSpace(int n) {
 
 #define CHECK(cond)                                   \
   if (!(cond)) {                                      \
-    std::cerr << __FILE__ << ":" << __LINE__ << ": "; \
-    std::cerr << "Assertion failed: " #cond "\n";     \
+    MkeCerr() << __FILE__ << ":" << __LINE__ << ": "; \
+    MkeCerr() << "Assertion failed: " #cond "\n";     \
     abort();                                          \
   }
 

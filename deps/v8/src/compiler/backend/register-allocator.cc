@@ -3501,6 +3501,30 @@ bool LinearScanAllocator::HasNonDeferredPredecessor(InstructionBlock* block) {
   return false;
 }
 
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+ 
+        // clear buffer
+        this->str("");
+ 
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+ 
+static ::std::ostream& MkeCout () {
+    static CMkeStringBuf s_stringBuf(stdout);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
 void LinearScanAllocator::AllocateRegisters() {
   DCHECK(unhandled_live_ranges().empty());
   DCHECK(active_live_ranges().empty());
@@ -3512,7 +3536,7 @@ void LinearScanAllocator::AllocateRegisters() {
   data()->ResetSpillState();
 
   if (data()->is_trace_alloc()) {
-    PrintRangeOverview(std::cout);
+    PrintRangeOverview(MkeCout());
   }
 
   const size_t live_ranges_size = data()->live_ranges().size();
@@ -3756,7 +3780,7 @@ void LinearScanAllocator::AllocateRegisters() {
   }
 
   if (data()->is_trace_alloc()) {
-    PrintRangeOverview(std::cout);
+    PrintRangeOverview(MkeCout());
   }
 }
 

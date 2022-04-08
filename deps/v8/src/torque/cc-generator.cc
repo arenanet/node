@@ -332,7 +332,8 @@ void CCGenerator::EmitInstruction(const ReturnInstruction& instruction,
 void CCGenerator::EmitInstruction(
     const PrintConstantStringInstruction& instruction,
     Stack<std::string>* stack) {
-  out() << "  std::cout << " << StringLiteralQuote(instruction.message)
+  //out() << "  std::cout << " << StringLiteralQuote(instruction.message)
+  out() << "  printf(" << StringLiteralQuote(instruction.message) << ")"
         << ";\n";
 }
 

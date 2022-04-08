@@ -207,6 +207,30 @@ InterpreterCompilationJob::Status InterpreterCompilationJob::ExecuteJobImpl() {
 }
 
 #ifdef DEBUG
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+
+        // clear buffer
+        this->str("");
+
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+
+static ::std::ostream& MkeCerr () {
+    static CMkeStringBuf s_stringBuf(stderr);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
 template <typename IsolateT>
 void InterpreterCompilationJob::CheckAndPrintBytecodeMismatch(
     IsolateT* isolate, Handle<Script> script, Handle<BytecodeArray> bytecode) {
@@ -218,27 +242,27 @@ void InterpreterCompilationJob::CheckAndPrintBytecodeMismatch(
     Handle<BytecodeArray> new_bytecode =
         generator()->FinalizeBytecode(isolate, script);
 
-    std::cerr << "Bytecode mismatch";
+    MkeCerr() << "Bytecode mismatch";
 #ifdef OBJECT_PRINT
-    std::cerr << " found for function: ";
+    MkeCerr() << " found for function: ";
     MaybeHandle<String> maybe_name = parse_info()->literal()->GetName(isolate);
     Handle<String> name;
     if (maybe_name.ToHandle(&name) && name->length() != 0) {
-      name->PrintUC16(std::cerr);
+      name->PrintUC16(MkeCerr());
     } else {
-      std::cerr << "anonymous";
+      MkeCerr() << "anonymous";
     }
     Object script_name = script->GetNameOrSourceURL();
     if (script_name.IsString()) {
-      std::cerr << " ";
-      String::cast(script_name).PrintUC16(std::cerr);
-      std::cerr << ":" << parse_info()->literal()->start_position();
+      MkeCerr() << " ";
+      String::cast(script_name).PrintUC16(MkeCerr());
+      MkeCerr() << ":" << parse_info()->literal()->start_position();
     }
 #endif
-    std::cerr << "\nOriginal bytecode:\n";
-    bytecode->Disassemble(std::cerr);
-    std::cerr << "\nNew bytecode:\n";
-    new_bytecode->Disassemble(std::cerr);
+    MkeCerr() << "\nOriginal bytecode:\n";
+    bytecode->Disassemble(MkeCerr());
+    MkeCerr() << "\nNew bytecode:\n";
+    new_bytecode->Disassemble(MkeCerr());
     FATAL("Bytecode mismatch at offset %d\n", first_mismatch);
   }
 }

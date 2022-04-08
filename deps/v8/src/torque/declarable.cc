@@ -5,7 +5,6 @@
 #include "src/torque/declarable.h"
 
 #include <fstream>
-#include <iostream>
 
 #include "src/torque/ast.h"
 #include "src/torque/global-context.h"

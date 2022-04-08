@@ -9,19 +9,51 @@
 
 #include <algorithm>
 #include <cstring>
-#include <iostream>
+#include <sstream>
 #include <vector>
 
 namespace v8 {
 namespace bigint {
 
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+
+        // clear buffer
+        this->str("");
+
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+
+static ::std::ostream& MkeCout () {
+    static CMkeStringBuf s_stringBuf(stdout);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
+static ::std::ostream& MkeCerr () {
+    static CMkeStringBuf s_stringBuf(stderr);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
+
 // To play nice with embedders' macros, we define our own DCHECK here.
 // It's only used in this file, and undef'ed at the end.
 #ifdef DEBUG
+
 #define BIGINT_H_DCHECK(cond)                         \
   if (!(cond)) {                                      \
-    std::cerr << __FILE__ << ":" << __LINE__ << ": "; \
-    std::cerr << "Assertion failed: " #cond "\n";     \
+    MkeCerr() << __FILE__ << ":" << __LINE__ << ": "; \
+    MkeCerr() << "Assertion failed: " #cond "\n";     \
     abort();                                          \
   }
 

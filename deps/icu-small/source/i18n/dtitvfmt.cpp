@@ -32,7 +32,7 @@
 #include "formattedval_impl.h"
 
 #ifdef DTITVFMT_DEBUG
-#include <iostream>
+//#include <iostream> MKE
 #endif
 
 U_NAMESPACE_BEGIN
@@ -963,7 +963,7 @@ DateIntervalFormat::initializePattern(UErrorCode& status) {
 UnicodeString
 DateIntervalFormat::normalizeHourMetacharacters(const UnicodeString& skeleton) const {
     UnicodeString result = skeleton;
-    
+
     UChar hourMetachar = u'\0';
     int32_t metacharStart = 0;
     int32_t metacharCount = 0;
@@ -981,7 +981,7 @@ DateIntervalFormat::normalizeHourMetacharacters(const UnicodeString& skeleton) c
             }
         }
     }
-    
+
     if (hourMetachar != u'\0') {
         UErrorCode err = U_ZERO_ERROR;
         UChar hourChar = CAP_H;
@@ -999,7 +999,7 @@ DateIntervalFormat::normalizeHourMetacharacters(const UnicodeString& skeleton) c
                 }
                 convertedPattern.replace(firstQuotePos, (secondQuotePos - firstQuotePos) + 1, UnicodeString());
             }
-        
+
             if (convertedPattern.indexOf(LOW_H) != -1) {
                 hourChar = LOW_H;
             } else if (convertedPattern.indexOf(CAP_K) != -1) {
@@ -1007,14 +1007,14 @@ DateIntervalFormat::normalizeHourMetacharacters(const UnicodeString& skeleton) c
             } else if (convertedPattern.indexOf(LOW_K) != -1) {
                 hourChar = LOW_K;
             }
-            
+
             if (convertedPattern.indexOf(LOW_B) != -1) {
                 dayPeriodChar = LOW_B;
             } else if (convertedPattern.indexOf(CAP_B) != -1) {
                 dayPeriodChar = CAP_B;
             }
         }
-        
+
         if (hourChar == CAP_H || hourChar == LOW_K) {
             result.replace(metacharStart, metacharCount, hourChar);
         } else {
@@ -1823,20 +1823,20 @@ DateIntervalFormat::findReplaceInPattern(UnicodeString& targetString,
     } else {
         UnicodeString result;
         UnicodeString source = targetString;
-        
+
         while (firstQuoteIndex >= 0) {
             int32_t secondQuoteIndex = source.indexOf(u'\'', firstQuoteIndex + 1);
             if (secondQuoteIndex == -1) {
                 secondQuoteIndex = source.length() - 1;
             }
-            
+
             UnicodeString unquotedText(source, 0, firstQuoteIndex);
             UnicodeString quotedText(source, firstQuoteIndex, secondQuoteIndex - firstQuoteIndex + 1);
-            
+
             unquotedText.findAndReplace(strToReplace, strToReplaceWith);
             result += unquotedText;
             result += quotedText;
-            
+
             source.remove(0, secondQuoteIndex + 1);
             firstQuoteIndex = source.indexOf(u'\'');
         }

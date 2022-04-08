@@ -5,8 +5,6 @@
 #ifndef V8_TORQUE_TORQUE_CODE_GENERATOR_H_
 #define V8_TORQUE_TORQUE_CODE_GENERATOR_H_
 
-#include <iostream>
-
 #include "src/torque/cfg.h"
 #include "src/torque/declarable.h"
 

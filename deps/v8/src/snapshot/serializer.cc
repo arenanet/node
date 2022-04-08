@@ -150,7 +150,37 @@ void Serializer::SerializeRootObject(FullObjectSlot slot) {
 }
 
 #ifdef DEBUG
-void Serializer::PrintStack() { PrintStack(std::cout); }
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+
+        // clear buffer
+        this->str("");
+
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+
+static ::std::ostream& MkeCout () {
+    static CMkeStringBuf s_stringBuf(stdout);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
+static ::std::ostream& MkeCerr () {
+    static CMkeStringBuf s_stringBuf(stderr);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
+void Serializer::PrintStack() { PrintStack(MkeCout()); }
 
 void Serializer::PrintStack(std::ostream& out) {
   for (const auto o : stack_) {
@@ -324,7 +354,7 @@ ExternalReferenceEncoder::Value Serializer::EncodeExternalReference(
       external_reference_encoder_.TryEncode(addr);
   if (result.IsNothing()) {
 #ifdef DEBUG
-    PrintStack(std::cerr);
+    PrintStack(MkeCerr());
 #endif
     void* addr_ptr = reinterpret_cast<void*>(addr);
     v8::base::OS::PrintError("Unknown external reference %p.\n", addr_ptr);

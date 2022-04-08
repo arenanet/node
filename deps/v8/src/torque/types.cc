@@ -5,7 +5,6 @@
 #include "src/torque/types.h"
 
 #include <cmath>
-#include <iostream>
 
 #include "src/base/bits.h"
 #include "src/base/optional.h"

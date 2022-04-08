@@ -5,7 +5,6 @@
 #ifndef V8_BASE_ADDRESS_REGION_H_
 #define V8_BASE_ADDRESS_REGION_H_
 
-#include <iostream>
 
 #include "src/base/macros.h"
 

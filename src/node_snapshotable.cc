@@ -1,6 +1,5 @@
 
 #include "node_snapshotable.h"
-#include <iostream>
 #include <sstream>
 #include "base_object-inl.h"
 #include "debug_utils-inl.h"

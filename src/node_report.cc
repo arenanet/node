@@ -17,7 +17,6 @@
 #include <dlfcn.h>
 #endif
 
-#include <iostream>
 #include <cstring>
 #include <ctime>
 #include <cwctype>
@@ -83,6 +82,36 @@ static void PrintRelease(JSONWriter* writer);
 static void PrintCpuInfo(JSONWriter* writer);
 static void PrintNetworkInterfaceInfo(JSONWriter* writer);
 
+class CMkeStringBuf final : public std::stringbuf {
+public:
+    CMkeStringBuf (FILE * handle) : m_handle(handle) {}
+
+    int sync() override {
+        // write out buffer
+        fprintf(m_handle, "%s", this->str().c_str());
+
+        // clear buffer
+        this->str("");
+
+        // return success
+        return 0;
+    }
+private:
+   FILE * m_handle;
+};
+
+static ::std::ostream& MkeCerr () {
+    static CMkeStringBuf s_stringBuf(stderr);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
+static ::std::ostream& MkeCout () {
+    static CMkeStringBuf s_stringBuf(stdout);
+    static std::ostream s_stream(&s_stringBuf);
+    return s_stream;
+}
+
 // External function to trigger a report, writing to file.
 std::string TriggerNodeReport(Isolate* isolate,
                               Environment* env,
@@ -117,9 +146,9 @@ std::string TriggerNodeReport(Isolate* isolate,
   std::ofstream outfile;
   std::ostream* outstream;
   if (filename == "stdout") {
-    outstream = &std::cout;
+    outstream = &MkeCout();
   } else if (filename == "stderr") {
-    outstream = &std::cerr;
+    outstream = &MkeCerr();
   } else {
     std::string report_directory;
     {
@@ -137,16 +166,19 @@ std::string TriggerNodeReport(Isolate* isolate,
     }
     // Check for errors on the file open
     if (!outfile.is_open()) {
-      std::cerr << "\nFailed to open Node.js report file: " << filename;
+      // MKE: std::cerr << "\nFailed to open Node.js report file: " << filename;
+      fprintf(stderr, "\nFailed to open Node.js report file: %s", filename.c_str());
 
-      if (report_directory.length() > 0)
-        std::cerr << " directory: " << report_directory;
+      if (report_directory.length() > 0) {
+        // MKE: std::cerr << " directory: " << report_directory;
+        fprintf(stderr, " directory: %s", report_directory.c_str());
+      }
 
-      std::cerr << " (errno: " << errno << ")" << std::endl;
+      MkeCerr() << " (errno: " << errno << ")" << std::endl;
       return "";
     }
     outstream = &outfile;
-    std::cerr << "\nWriting Node.js report to file: " << filename;
+    MkeCerr()  << "\nWriting Node.js report to file: " << filename;
   }
 
   bool compact;
@@ -164,7 +196,8 @@ std::string TriggerNodeReport(Isolate* isolate,
 
   // Do not mix JSON and free-form text on stderr.
   if (filename != "stderr") {
-    std::cerr << "\nNode.js report completed" << std::endl;
+    // MKE: std::cerr << "\nNode.js report completed" << std::endl;
+    fprintf(stderr, "\nNode.js report completed\n");
   }
   return filename;
 }
